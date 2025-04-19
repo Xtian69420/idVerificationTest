@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SumSub Integration</title>
+    <style>
+        #sumsub-websdk-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #eee;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button id="idver">Start Verification</button>
+    <div id="sumsub-websdk-container"></div>
+
+    <!-- Load SumSub SDK from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@sumsub/websdk@latest/dist/sns-websdk-script.min.js"></script>
+    
+    <script>
+        // Wait for SDK to be fully loaded
+        function waitForSdk() {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.snsWebSdk) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
+        }
+
+        async function getNewAccessToken() {
+            console.warn("Using mock token - replace with real token from your backend");
+            return "sbx:HcWBpFAc6PTJvm4x67I5Phlg.mLFzTJrp3E5st4ddSYeyCYVOg9fCuGSO";
+        }
+
+        function launchWebSdk(accessToken) {
+            const snsWebSdkInstance = window.snsWebSdk
+                .init(
+                    accessToken,
+                    () => getNewAccessToken()
+                )
+                .withConf({
+                    lang: 'en',
+                })
+                .on('onError', (error) => {
+                    console.error('SumSub Error:', error);
+                    alert("Verification error: " + error.message);
+                })
+                .onMessage((type, payload) => {
+                    console.log('SumSub Message:', type, payload);
+                })
+                .build();
+
+            snsWebSdkInstance.launch('#sumsub-websdk-container');
+        }
+
+        async function initSumSub() {
+            try {
+                await waitForSdk(); // Wait for SDK to be ready
+                const initialToken = await getNewAccessToken();
+                document.getElementById('idver').disabled = true;
+                launchWebSdk(initialToken);
+            } catch (error) {
+                console.error('Failed to initialize SumSub:', error);
+                alert("Failed to start verification: " + error.message);
+            }
+        }
+
+        // Add event listener to button
+        document.getElementById('idver').addEventListener('click', initSumSub);
+    </script>
+</body>
+</html>

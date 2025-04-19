@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYC Verification Results</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>KYC Verification Results</h1>
+    
+    <div id="results-container">
+      <div class="loading">Loading verification results...</div>
+    </div>
+    
+    <div class="actions">
+      <a href="/" class="btn">Start New Verification</a>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId');
+      
+      if (!userId) {
+        document.getElementById('results-container').innerHTML = `
+          <div class="error">No user ID provided</div>
+        `;
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/verification-results/${userId}`);
+        const results = await response.json();
+        
+        if (response.ok) {
+          displayResults(results);
+        } else {
+          throw new Error(results.error || 'Failed to load results');
+        }
+      } catch (error) {
+        document.getElementById('results-container').innerHTML = `
+          <div class="error">Error: ${error.message}</div>
+        `;
+      }
+    });
+    
+    function displayResults(results) {
+      const container = document.getElementById('results-container');
+      
+      if (!results.status) {
+        container.innerHTML = `
+          <div class="status pending">
+            <h2>Verification Pending</h2>
+            <p>The verification process is still in progress.</p>
+            <p>This page will automatically update when results are available.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let statusClass = '';
+      let statusText = '';
+      
+      switch(results.status.toLowerCase()) {
+        case 'completed':
+          statusClass = 'completed';
+          statusText = 'Approved';
+          break;
+        case 'rejected':
+          statusClass = 'rejected';
+          statusText = 'Rejected';
+          break;
+        default:
+          statusClass = 'pending';
+          statusText = 'Pending';
+      }
+      
+      container.innerHTML = `
+        <div class="status ${statusClass}">
+          <h2>Verification Status: ${statusText}</h2>
+          
+          ${results.decision ? `<p><strong>Decision:</strong> ${results.decision}</p>` : ''}
+          ${results.details ? `<p><strong>Details:</strong> ${results.details}</p>` : ''}
+          ${results.createdAt ? `<p><strong>Completed:</strong> ${new Date(results.createdAt).toLocaleString()}</p>` : ''}
+          
+          ${results.applicantData ? `
+            <div class="applicant-info">
+              <h3>Applicant Information</h3>
+              <p><strong>User ID:</strong> ${userId}</p>
+              <p><strong>Email:</strong> ${results.applicantData.email || 'N/A'}</p>
+              <p><strong>Country:</strong> ${results.applicantData.country || 'N/A'}</p>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

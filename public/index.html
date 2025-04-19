@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYC Verification Test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://sdk.sumsub.com/idensic/static/sns-websdk-bundle.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>KYC Verification Test</h1>
+    
+    <div class="form-group">
+      <label for="userId">Test User ID:</label>
+      <input type="text" id="userId" value="test_user_${Date.now()}">
+    </div>
+    
+    <div class="form-group">
+      <label for="userEmail">Test Email:</label>
+      <input type="email" id="userEmail" value="test${Math.floor(Math.random() * 1000)}@example.com">
+    </div>
+    
+    <div class="form-group">
+      <label for="userCountry">Country:</label>
+      <select id="userCountry">
+        <option value="USA">United States</option>
+        <option value="GBR">United Kingdom</option>
+        <option value="DEU">Germany</option>
+        <option value="FRA">France</option>
+        <option value="JPN">Japan</option>
+      </select>
+    </div>
+    
+    <button id="startVerification" class="btn">Start KYC Verification</button>
+    
+    <div id="verification-container" class="hidden">
+      <h2>Verification Process</h2>
+      <div id="sumsub-websdk"></div>
+    </div>
+    
+    <div id="status" class="status-message"></div>
+    
+    <div id="results-link" class="hidden">
+      <a href="#" id="viewResults">View Verification Results</a>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
